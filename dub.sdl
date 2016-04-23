@@ -2,6 +2,7 @@ name "objective-gl"
 description "High-level & thin OpenGL Wrapper/Helper."
 copyright "Copyright © 2016 S.Percentage"
 authors "S.Percentage"
+license "MIT"
 
 targetType "sourceLibrary"
 dependency "derelict-gl3" version="*"

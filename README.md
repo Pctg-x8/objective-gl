@@ -11,6 +11,10 @@ High-level OpenGL Wrapper/Helper.
 - [dglsl](http://code.dlang.org/packages/dglsl) support(Write shader codes in Dlang source)
 - Auto-generated vertex attribute configuration
 
+## API Documentation
+
+See https://pctg-x8.github.io/docs/objectivegl/gl.html
+
 ### Example: Rendering with Objective-GL
 
 Add project directory(`.`) to `stringImportPaths` in project settings(dub.sdl).

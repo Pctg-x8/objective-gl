@@ -25,7 +25,7 @@ module objectivegl.core;
 // Version Have_dglsl: Enabled dglsl support if required
 
 public import derelict.opengl3.gl3;
-import std.string, std.algorithm, std.range, std.meta, std.traits;
+import std.string, std.algorithm, std.range, std.meta, std.traits, std.typecons;
 version(Have_dglsl)
 {
 	import dglsl;
@@ -295,6 +295,16 @@ void useWith(alias F)(ShaderProgram p)
     glUseProgram(0);
 }
 
+/// Blend Function
+alias BlendFunc = Tuple!(GLenum, "srcBlend", GLenum, "destBlend");
+/// Predefined Blend Functions
+final class BlendFunctions
+{
+	@disable this();
+	
+	static immutable Alpha = BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
 /// OpenGL Device Representation
 final class GLDevice
 {
@@ -325,6 +335,21 @@ final class GLDevice
 		static void opAssign(in VertexArray varray)
 		{
 			glBindVertexArray(varray.aid);
+		}
+	}
+	
+	/// Rasterizer State
+	static class RasterizerState
+	{
+		@disable this();
+		
+		static void opDispatch(string name)(bool flag) if(name == "Blending")
+		{
+			(flag ? glEnable : glDisable)(GL_BLEND);
+		}
+		static void opDispatch(string name)(BlendFunc blend) if(name == "BlendFunc")
+		{
+			glBlendFunc(blend.srcBlend, blend.destBlend);
 		}
 	}
 }

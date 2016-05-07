@@ -1,6 +1,6 @@
 /**
  * <div class="header">
- * High-level OpenGL Wrapper/Helpers
+ * High-level OpenGL Wrapper/Helpers: Core Package
  * Authors: S.Percentage
  * </div>
  */
@@ -20,7 +20,7 @@ $(BODY)
 </div>
 </body></html>
 */
-module objectivegl;
+module objectivegl.core;
 
 // Version Have_dglsl: Enabled dglsl support if required
 

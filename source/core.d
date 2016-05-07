@@ -178,6 +178,8 @@ final class ShaderProgram
         this.pid = p;
         this.elements = elements.map!(x => ResolvedInputElement(glGetAttribLocation(p, x.attrName.toStringz),
 			x.size, x.type, x.normalized, x.stride, x.offset)).array;
+		
+		this.uniforms = new UniformLocations();
     }
     ~this() { glDeleteProgram(this.pid); }
 	
@@ -199,10 +201,12 @@ final class ShaderProgram
 	/// Make shader program from source codes
 	public static auto fromSources(VertexDataT, ShaderSources...)()
 	{
-		auto shaders = ShaderSources.chunks(2).map!((a)
+		auto compileShader(ShaderType T, string Source)()
 		{
-			auto sh = glCreateShader(a[0]);
-			glShaderSource(sh, 1, &a[1], &[a[1].length]);
+			auto sh = glCreateShader(T);
+			auto src = Source.toStringz;
+			auto srcLength = Source.length;
+			glShaderSource(sh, 1, &src, cast(GLint*)&srcLength);
 			glCompileShader(sh);
 			
 			GLint status;
@@ -217,7 +221,13 @@ final class ShaderProgram
 				throw new Exception(errbuf.idup);
 			}
 			return sh;
-		}).array();
+		}
+		template shaderCompilationList(ShaderSources...)
+		{
+			static if(ShaderSources.length < 2) alias shaderCompilationList = AliasSeq!();
+			else alias shaderCompilationList = AliasSeq!(compileShader!(ShaderSources[0], ShaderSources[1]), shaderCompilationList!(ShaderSources[2 .. $]));
+		}
+		auto shaders = [shaderCompilationList!ShaderSources];
 		scope(exit) shaders.each!glDeleteShader;
 		
 		auto p = glCreateProgram();
@@ -255,6 +265,26 @@ final class ShaderProgram
         }
         glUseProgram(0);
     }
+	
+	class UniformLocations
+	{
+		GLuint[string] cache;
+		
+		public auto opDispatch(string name)(float v) { this[name] = v; }
+		public auto opDispatch(string name)(float[4] vf) { this[name] = vf; }
+		public auto opDispatch(string name)(float[4][4] matr) { this[name] = matr; }
+		public auto opIndexAssign(float v, string name) { glUniform1f(this.getLocation(name), v); }
+		public auto opIndexAssign(float[4] vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.ptr); }
+		public auto opIndexAssign(float[4][4] matr, string name) { glUniformMatrix4fv(this.getLocation(name), 1, GL_FALSE, &matr[0][0]); }
+		
+		private auto getLocation(string name)
+		{
+			if(name !in cache) cache[name] = glGetUniformLocation(this.outer.pid, name.toStringz);
+			return cache[name];
+		}
+	}
+	/// Field like Uniform Accessors
+	UniformLocations uniforms;
 }
 
 /// Guarded shader using instruct

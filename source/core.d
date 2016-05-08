@@ -308,6 +308,12 @@ final class ShaderProgram
         glUseProgram(0);
     }
 	
+	/// Activates(Uses) shader program
+	public void activate() const
+	{
+		glUseProgram(this.pid);
+	}
+	
 	private class UniformLocations
 	{
 		GLuint[string] cache;
@@ -343,14 +349,6 @@ final class ShaderProgram
 	}
 	/// Field like Uniform Block Binding
 	UniformBlockIndices uniformBlocks;
-}
-
-/// Guarded shader using instruct
-void useWith(alias F)(ShaderProgram p)
-{
-    glUseProgram(p.pid);
-    F();
-    glUseProgram(0);
 }
 
 /// Blend Function

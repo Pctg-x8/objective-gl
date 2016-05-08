@@ -40,36 +40,40 @@ enum PixelFormat
     Grayscale = GL_RED
 }
 
-/// OpenGL Texture2D Representation
-final class Texture2D
+/// OpenGL Texture Interfacing
+abstract class Texture(GLenum TextureType)
 {
-    private GLuint _id;
+	protected GLuint id;
+	
+	protected this() { glGenTextures(1, &this.id); }
+	~this() { glDeleteTextures(1, &this.id); }
+	
+	protected void bind() { glBindTexture(TextureType, this.id); }
+	static class Parameter
+	{
+		@disable this();
+		
+		static auto opIndexAssign(GLint value, GLenum param) { glTexParameteri(TextureType, param, value); }
+	}
+}
 
-    private this(GLuint id) { _id = id; }
-    ~this()
-    {
-        glDeleteTextures(1, &_id);
-    }
-
+/// OpenGL Texture2D Representation
+final class Texture2D : Texture!GL_TEXTURE_2D
+{
     /// Makes empty texture
     public static auto newEmpty(int width, int height, PixelFormat format) in { assert(width >= 1 && height >= 1); } body
     {
-        GLuint id;
-
-        glGenTextures(1, &id);
-        glBindTexture(GL_TEXTURE_2D, id);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, null);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return new Texture2D(id);
+		auto obj = new Texture2D();
+		obj.bind();
+		Texture2D.Parameter[GL_TEXTURE_MIN_FILTER] = GL_LINEAR;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, null);
+		return obj;
     }
 
     /// Updates texture
     public void update(int x, int y, int width, int height, const(ubyte)* pixels, PixelFormat format)
     {
-        glBindTexture(GL_TEXTURE_2D, this._id);
-        scope(exit) glBindTexture(GL_TEXTURE_2D, 0);
-
+		this.bind();
         glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, format, GL_UNSIGNED_BYTE, pixels);
     }
 }
@@ -371,10 +375,10 @@ final class GLDevice
 	{
 		@disable this();
 		
-		static void opIndexAssign(in Texture2D tex, int index)
+		static void opIndexAssign(GLenum TextureType)(in Texture!TextureType tex, int index)
 		{
 			glActiveTexture(GL_TEXTURE0 + index);
-			glBindTexture(GL_TEXTURE_2D, tex._id);
+			glBindTexture(TextureType, tex.id);
 		}
 	}
 	/// Accessing texture unit with index

@@ -74,6 +74,24 @@ final class Texture2D
     }
 }
 
+/// OpenGL Buffer Object Interfacing
+abstract class Buffer(GLenum BufferType)
+{
+	protected GLuint id;
+	protected this(GLuint buffer) { this.id = buffer; }
+	~this() { glDeleteBuffers(1, &this.id); }
+	
+	protected static auto newOne(BufferDataT)(in BufferDataT* ptr, GLenum usage)
+	{
+		GLuint b;
+		
+		glGenBuffers(1, &b);
+		glBindBuffer(BufferType, b); scope(exit) glBindBuffer(BufferType, 0);
+		glBufferData(BufferType, BufferDataT.sizeof, ptr, usage);
+		return b;
+	}
+}
+
 /// OpenGL VertexArrayObject Representation
 final class VertexArray
 {
@@ -109,6 +127,29 @@ final class VertexArray
 	{
 		GLDevice.Vertices = this;
 		glDrawArraysInstanced(primitiveType, 0, this.vcount, count);
+	}
+}
+
+/// OpenGL Uniform Buffer Representation
+final class UniformBuffer(BufferStructureT) : Buffer!GL_UNIFORM_BUFFER
+{
+	private this(GLuint id) { super(id); }
+	/// Makes new Static(Modified once, used many times) Uniform Buffer with Data
+	public static auto newStatic(BufferStructureT buffer)
+	{
+		return new UniformBuffer(newOne(&buffer, GL_STATIC_DRAW));
+	}
+	/// Makes new Static(Modified once, used many times) Uniform Buffer
+	public static auto newStatic()
+	{
+		return new UniformBuffer(newOne!BufferStructureT(null, GL_STATIC_DRAW));
+	}
+	
+	/// Updates buffer data
+	public void update(BufferStructureT buffer)
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, this.id); scope(exit) glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, BufferStructureT.sizeof, &buffer);
 	}
 }
 
@@ -180,6 +221,7 @@ final class ShaderProgram
 			x.size, x.type, x.normalized, x.stride, x.offset)).array;
 		
 		this.uniforms = new UniformLocations();
+		this.uniformBlocks = new UniformBlockIndices();
     }
     ~this() { glDeleteProgram(this.pid); }
 	
@@ -266,16 +308,16 @@ final class ShaderProgram
         glUseProgram(0);
     }
 	
-	class UniformLocations
+	private class UniformLocations
 	{
 		GLuint[string] cache;
 		
 		public auto opDispatch(string name)(float v) { this[name] = v; }
-		public auto opDispatch(string name)(float[4] vf) { this[name] = vf; }
-		public auto opDispatch(string name)(float[4][4] matr) { this[name] = matr; }
+		public auto opDispatch(string name)(in float[4] vf) { this[name] = vf; }
+		public auto opDispatch(string name)(in float[4][4] matr) { this[name] = matr; }
 		public auto opIndexAssign(float v, string name) { glUniform1f(this.getLocation(name), v); }
-		public auto opIndexAssign(float[4] vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.ptr); }
-		public auto opIndexAssign(float[4][4] matr, string name) { glUniformMatrix4fv(this.getLocation(name), 1, GL_FALSE, &matr[0][0]); }
+		public auto opIndexAssign(in float[4] vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.ptr); }
+		public auto opIndexAssign(in float[4][4] matr, string name) { glUniformMatrix4fv(this.getLocation(name), 1, GL_FALSE, &matr[0][0]); }
 		
 		private auto getLocation(string name)
 		{
@@ -285,6 +327,22 @@ final class ShaderProgram
 	}
 	/// Field like Uniform Accessors
 	UniformLocations uniforms;
+	
+	private class UniformBlockIndices
+	{
+		GLuint[string] cache;
+		
+		public auto opDispatch(string name)(int idx) { this[name] = idx; }
+		public auto opIndexAssign(int idx, string name) { glUniformBlockBinding(this.outer.pid, this.getIndex(name), idx); }
+		
+		private auto getIndex(string name)
+		{
+			if(name !in cache) cache[name] = glGetUniformBlockIndex(this.outer.pid, name.toStringz);
+			return cache[name];
+		}
+	}
+	/// Field like Uniform Block Binding
+	UniformBlockIndices uniformBlocks;
 }
 
 /// Guarded shader using instruct
@@ -325,6 +383,17 @@ final class GLDevice
 	unittest
 	{
 		GLDevice.TextureUnits[0] = texture;
+	}
+	
+	/// Binding Point Table
+	static class BindingPoint
+	{
+		@disable this();
+		
+		static void opIndexAssign(T)(in UniformBuffer!T buffer, int index)
+		{
+			glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer.id);
+		}
 	}
 	
 	/// Input Assembler: Vertex Buffer and Input Layout

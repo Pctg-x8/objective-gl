@@ -410,10 +410,17 @@ final class GLDevice
 	{
 		@disable this();
 		
-		static void opDispatch(string name)(bool flag) if(name == "Blending")
+		private static class DeviceCaps(GLenum CapEnum)
 		{
-			(flag ? glEnable : glDisable)(GL_BLEND);
+			@disable this();
+			
+			static void opAssign(bool flag)
+			{
+				(flag ? glEnable : glDisable)(CapEnum);
+			}
 		}
+		public alias Blending = DeviceCaps!GL_BLEND;
+		public alias ScissorTest = DeviceCaps!GL_SCISSOR_TEST;
 		static void opDispatch(string name)(BlendFunc blend) if(name == "BlendFunc")
 		{
 			glBlendFunc(blend.srcBlend, blend.destBlend);

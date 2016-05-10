@@ -425,6 +425,7 @@ final class GLDevice
 		}
 		public alias Blending = DeviceCaps!GL_BLEND;
 		public alias ScissorTest = DeviceCaps!GL_SCISSOR_TEST;
+		public alias BackCulling = DeviceCaps!GL_CULL_FACE;
 		static void opDispatch(string name)(BlendFunc blend) if(name == "BlendFunc")
 		{
 			glBlendFunc(blend.srcBlend, blend.destBlend);

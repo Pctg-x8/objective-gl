@@ -65,8 +65,9 @@ final class Texture2D : Texture!GL_TEXTURE_2D
     {
 		auto obj = new Texture2D();
 		obj.bind();
-		Texture2D.Parameter[GL_TEXTURE_MIN_FILTER] = GL_LINEAR;
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, null);
+		Texture2D.Parameter[GL_TEXTURE_MIN_FILTER] = GL_LINEAR;
+		Texture2D.Parameter[GL_TEXTURE_MAG_FILTER] = GL_LINEAR;
 		return obj;
     }
 

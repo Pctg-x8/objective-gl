@@ -14,7 +14,7 @@ High-level OpenGL Wrapper/Helper.
 ## API Documentation
 
 objectivegl.core: https://pctg-x8.github.io/docs/objectivegl/core.html  
-objectivegl.utils: https://pctg-x8.github.io/docs/objectiegl/utils.html
+objectivegl.utils: https://pctg-x8.github.io/docs/objectivegl/utils.html
 
 ### Example: Rendering with Objective-GL
 

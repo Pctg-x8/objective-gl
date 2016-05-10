@@ -431,4 +431,12 @@ final class GLDevice
 			glBlendFunc(blend.srcBlend, blend.destBlend);
 		}
 	}
+	
+	/// Pixel Store
+	static class PixelStore
+	{
+		@disable this();
+		
+		static auto opIndexAssign(GLint value, GLenum param) { glPixelStorei(param, value); }
+	}
 }

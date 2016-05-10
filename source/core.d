@@ -264,7 +264,7 @@ final class ShaderProgram
 				GLchar[] errbuf;
 				glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &errlen);
 				errbuf.length = errlen;
-				glGetShaderInfoLog(sh, errbuf.length, null, errbuf.ptr);
+				glGetShaderInfoLog(sh, cast(GLint)errbuf.length, null, errbuf.ptr);
 				throw new Exception(errbuf.idup);
 			}
 			return sh;
@@ -289,7 +289,7 @@ final class ShaderProgram
 			GLchar[] errbuf;
 			glGetProgramiv(p, GL_INFO_LOG_LENGTH, &errlen);
 			errbuf.length = errlen;
-			glGetProgramInfoLog(p, errbuf.length, null, errbuf.ptr);
+			glGetProgramInfoLog(p, cast(GLint)errbuf.length, null, errbuf.ptr);
 			throw new Exception(errbuf.idup);
 		}
 		return new ShaderProgram(p, [IEDescList!VertexDataT]);

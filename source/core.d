@@ -323,10 +323,14 @@ final class ShaderProgram
 	{
 		GLuint[string] cache;
 		
+		public auto opDispatch(string name)(int v) { this[name] = v; }
 		public auto opDispatch(string name)(float v) { this[name] = v; }
+		public auto opDispatch(string name)(float[2] v) { this[name] = v; }
 		public auto opDispatch(string name)(in float[4] vf) { this[name] = vf; }
 		public auto opDispatch(string name)(in float[4][4] matr) { this[name] = matr; }
+		public auto opIndexAssign(int v, string name) { glUniform1i(this.getLocation(name), v); }
 		public auto opIndexAssign(float v, string name) { glUniform1f(this.getLocation(name), v); }
+		public auto opIndexAssign(float[2] v, string name) { glUniform2fv(this.getLocation(name), 1, v.ptr); }
 		public auto opIndexAssign(in float[4] vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.ptr); }
 		public auto opIndexAssign(in float[4][4] matr, string name) { glUniformMatrix4fv(this.getLocation(name), 1, GL_FALSE, &matr[0][0]); }
 		

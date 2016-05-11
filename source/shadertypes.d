@@ -1,6 +1,6 @@
 /**
  * <div class="header">
- * High-level OpenGL Wrapper/Helpers
+ * High-level OpenGL Wrapper/Helpers: Shader Types Definition
  * Authors: S.Percentage
  * </div>
  */
@@ -20,9 +20,8 @@ $(BODY)
 </div>
 </body></html>
 */
+module objectivegl.shadertypes;
 
-module objectivegl;
-
-public import objectivegl.core;
-public import objectivegl.utils;
-public import objectivegl.shadertypes;
+// Vector Types
+public alias ShaderVec2 = float[2];			/// vec2
+public alias ShaderVec4 = float[4];			/// vec4

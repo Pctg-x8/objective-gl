@@ -135,6 +135,18 @@ final class VertexArray
 	}
 }
 
+/// Type inferred Uniform Buffer factory
+final class UniformBufferFactory
+{
+	@disable this();
+	
+	/// Makes new Static(Modified once, used many times) Uniform Buffer with Data
+	public static auto newStatic(BufferStructureT)(BufferStructureT buffer)
+	{
+		return new UniformBuffer!BufferStructureT(Buffer!GL_UNIFORM_BUFFER.newOne(&buffer, GL_STATIC_DRAW));
+	}
+}
+
 /// OpenGL Uniform Buffer Representation
 final class UniformBuffer(BufferStructureT) : Buffer!GL_UNIFORM_BUFFER
 {

@@ -444,6 +444,7 @@ final class GLDevice
 		public alias ScissorTest = DeviceCaps!GL_SCISSOR_TEST;
 		public alias BackCulling = DeviceCaps!GL_CULL_FACE;
 		public alias DepthTest = DeviceCaps!GL_DEPTH_TEST;
+		public alias DepthClamp = DeviceCaps!GL_DEPTH_CLAMP;
 		static void opDispatch(string name)(BlendFunc blend) if(name == "BlendFunc")
 		{
 			glBlendFunc(blend.srcBlend, blend.destBlend);

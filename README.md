@@ -57,7 +57,7 @@ struct VertexData
 void main()
 {
     DerelictGL3.load();
-    DerelictGLFW3.load("lib/libglfw.3.dylib");
+    DerelictGLFW3.load();
     if(!glfwInit()) throw new Exception("GLFW initialization failed.");
     scope(exit) glfwTerminate();
 

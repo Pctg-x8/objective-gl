@@ -133,6 +133,14 @@ final class VertexArray
 		GLDevice.Vertices = this;
 		glDrawArraysInstanced(primitiveType, 0, this.vcount, count);
 	}
+
+	/// Updates buffer data
+	public void update(T)(const T[] slice)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, this.bid); scope(exit) glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBufferData(GL_ARRAY_BUFFER, slice.length * T.sizeof, slice.ptr, GL_STATIC_DRAW);
+		this.vcount = cast(GLuint)slice.length;
+	}
 }
 
 /// Type inferred Uniform Buffer factory

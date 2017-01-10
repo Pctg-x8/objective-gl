@@ -25,3 +25,4 @@ module objectivegl.shadertypes;
 // Vector Types
 public alias ShaderVec2 = float[2];			/// vec2
 public alias ShaderVec4 = float[4];			/// vec4
+public alias ShaderMatrix4 = float[4 * 4];	/// mat4

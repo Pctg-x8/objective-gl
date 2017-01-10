@@ -35,9 +35,9 @@ version(Have_dglsl)
 enum PixelFormat
 {
 	/// 32bpp full color
-    RGBA = GL_RGBA,
+	RGBA = GL_RGBA,
 	/// 8bpp single color
-    Grayscale = GL_RED
+	Grayscale = GL_RED
 }
 
 /// OpenGL Texture Interfacing
@@ -60,23 +60,23 @@ abstract class Texture(GLenum TextureType)
 /// OpenGL Texture2D Representation
 final class Texture2D : Texture!GL_TEXTURE_2D
 {
-    /// Makes empty texture
-    public static auto newEmpty(int width, int height, PixelFormat format) in { assert(width >= 1 && height >= 1); } body
-    {
+	/// Makes empty texture
+	public static auto newEmpty(int width, int height, PixelFormat format) in { assert(width >= 1 && height >= 1); } body
+	{
 		auto obj = new Texture2D();
 		obj.bind();
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, null);
 		Texture2D.Parameter[GL_TEXTURE_MIN_FILTER] = GL_LINEAR;
 		Texture2D.Parameter[GL_TEXTURE_MAG_FILTER] = GL_LINEAR;
 		return obj;
-    }
+	}
 
-    /// Updates texture
-    public void update(int x, int y, int width, int height, const(ubyte)* pixels, PixelFormat format)
-    {
+	/// Updates texture
+	public void update(int x, int y, int width, int height, const(ubyte)* pixels, PixelFormat format)
+	{
 		this.bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, format, GL_UNSIGNED_BYTE, pixels);
-    }
+		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, format, GL_UNSIGNED_BYTE, pixels);
+	}
 }
 
 /// OpenGL Buffer Object Interfacing
@@ -100,32 +100,32 @@ abstract class Buffer(GLenum BufferType)
 /// OpenGL VertexArrayObject Representation
 final class VertexArray
 {
-    private GLuint aid, bid;
-    private GLuint vcount;
+	private GLuint aid, bid;
+	private GLuint vcount;
 
-    private this(GLuint array, GLuint buffer, GLuint vcount)
-    {
-        this.aid = array;
-        this.bid = buffer;
-        this.vcount = vcount;
-    }
-    ~this() { glDeleteBuffers(1, &this.bid); glDeleteVertexArrays(1, &this.aid); }
+	private this(GLuint array, GLuint buffer, GLuint vcount)
+	{
+		this.aid = array;
+		this.bid = buffer;
+		this.vcount = vcount;
+	}
+	~this() { glDeleteBuffers(1, &this.bid); glDeleteVertexArrays(1, &this.aid); }
 
-    /// Makes new Vertex Array Object from slice to be rendered with program
-    public static auto fromSlice(T)(const T[] slice, const ShaderProgram program)
-    {
-        GLuint aid, bid;
+	/// Makes new Vertex Array Object from slice to be rendered with program
+	public static auto fromSlice(T)(const T[] slice, const ShaderProgram program)
+	{
+		GLuint aid, bid;
 
-        glGenVertexArrays(1, &aid);
-        glGenBuffers(1, &bid);
+		glGenVertexArrays(1, &aid);
+		glGenBuffers(1, &bid);
 
-        glBindVertexArray(aid); scope(exit) glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, bid); scope(exit) glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBufferData(GL_ARRAY_BUFFER, slice.length * T.sizeof, slice.ptr, GL_STATIC_DRAW);
-        program.applyInputLayouts();
+		glBindVertexArray(aid); scope(exit) glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, bid); scope(exit) glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBufferData(GL_ARRAY_BUFFER, slice.length * T.sizeof, slice.ptr, GL_STATIC_DRAW);
+		program.applyInputLayouts();
 		
 		return new VertexArray(aid, bid, cast(GLuint)slice.length);
-    }
+	}
 	
 	/// Instanced drawing shorthand
 	public void drawInstanced(GLenum primitiveType)(GLint count)
@@ -197,12 +197,12 @@ private alias IEDescList(VertexDataT) = staticMap!(InputElementGen, getSymbolsBy
 // Vertex(Shader Input) Elements
 private struct InputElement
 {
-    string attrName;
-    GLint size;
-    GLenum type;
-    GLboolean normalized;
-    GLsizei stride;
-    const GLvoid* offset;
+	string attrName;
+	GLint size;
+	GLenum type;
+	GLboolean normalized;
+	GLsizei stride;
+	const GLvoid* offset;
 }
 
 /// Shader Source Types
@@ -219,28 +219,28 @@ enum ShaderType : GLenum
 /// OpenGL ShaderProgram Representation
 final class ShaderProgram
 {
-    private struct ResolvedInputElement
-    {
-        GLuint index;
-        GLint size;
-        GLenum type;
-        GLboolean normalized;
-        GLsizei stride;
-        const GLvoid* offset;
-    }
-    private ResolvedInputElement[] elements;
-    private GLuint pid;
+	private struct ResolvedInputElement
+	{
+		GLuint index;
+		GLint size;
+		GLenum type;
+		GLboolean normalized;
+		GLsizei stride;
+		const GLvoid* offset;
+	}
+	private ResolvedInputElement[] elements;
+	private GLuint pid;
 
-    private this(GLuint p, const InputElement[] elements)
-    {
-        this.pid = p;
-        this.elements = elements.map!(x => ResolvedInputElement(glGetAttribLocation(p, x.attrName.toStringz),
+	private this(GLuint p, const InputElement[] elements)
+	{
+		this.pid = p;
+		this.elements = elements.map!(x => ResolvedInputElement(glGetAttribLocation(p, x.attrName.toStringz),
 			x.size, x.type, x.normalized, x.stride, x.offset)).array;
 		
 		this.uniforms = new UniformLocations();
 		this.uniformBlocks = new UniformBlockIndices();
-    }
-    ~this() { glDeleteProgram(this.pid); }
+	}
+	~this() { glDeleteProgram(this.pid); }
 	
 	version(Have_dglsl)
 	{
@@ -314,16 +314,16 @@ final class ShaderProgram
 			ShaderType.Fragment, import("fsh.glsl"));
 	}
 
-    private void applyInputLayouts() const
-    {
-        glUseProgram(this.pid);
-        foreach(ref e; this.elements)
-        {
-            glEnableVertexAttribArray(e.index);
-            glVertexAttribPointer(e.index, e.size, e.type, e.normalized, e.stride, e.offset);
-        }
-        glUseProgram(0);
-    }
+	private void applyInputLayouts() const
+	{
+		glUseProgram(this.pid);
+		foreach(ref e; this.elements)
+		{
+			glEnableVertexAttribArray(e.index);
+			glVertexAttribPointer(e.index, e.size, e.type, e.normalized, e.stride, e.offset);
+		}
+		glUseProgram(0);
+	}
 	
 	/// Activates(Uses) shader program
 	public void activate() const
@@ -345,6 +345,14 @@ final class ShaderProgram
 		public auto opIndexAssign(float[2] v, string name) { glUniform2fv(this.getLocation(name), 1, v.ptr); }
 		public auto opIndexAssign(in float[4] vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.ptr); }
 		public auto opIndexAssign(in float[4][4] matr, string name) { glUniformMatrix4fv(this.getLocation(name), 1, GL_FALSE, &matr[0][0]); }
+		version(Have_gl3n)
+		{
+			import gl3n.linalg;
+			public auto opDispatch(string name)(in vec2 vf) { this[name] = vf; }
+			public auto opDispatch(string name)(in vec4 vf) { this[name] = vf; }
+			public auto opIndexAssign(in vec2 vf, string name) { glUniform2fv(this.getLocation(name), 1, vf.value_ptr); }
+			public auto opIndexAssign(in vec4 vf, string name) { glUniform4fv(this.getLocation(name), 1, vf.value_ptr); }
+		}
 		
 		private auto getLocation(string name)
 		{
